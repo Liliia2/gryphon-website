@@ -1,0 +1,14 @@
+# Secrets — НІКОЛИ не комітити
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Залежності
+node_modules/
+
+# OS / редактори
+.DS_Store
+Thumbs.db
+.vscode/
