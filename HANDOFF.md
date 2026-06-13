@@ -13,7 +13,9 @@ Landing page for auto leasing in Poland for foreigners and businesses.
 - Public site: `https://liliia2.github.io/gryphon-website/`.
 - GitHub repo: `https://github.com/Liliia2/gryphon-website`.
 - GitHub Pages source: `main` branch, root `/`.
-- Latest pushed commit after lead receiver work: `e025db2 Wire lead form receiver`.
+- Live URL (current): `https://liliia2.github.io/gryphon-website/` (working, HTTP 200, logo + images OK).
+- Latest pushed commit: `7181782 Temporarily remove custom domain until TheHost DNS is applied`.
+- Earlier commits: `a8eee7b Meta Pixel + cookie consent`, `be66c53 Add CNAME`.
 
 ## Current State
 
@@ -126,24 +128,41 @@ The online HTML was checked after deploy and contains:
 - current Web App endpoint
 - fallback Telegram link `https://t.me/Gryphon_Group`
 
-## Next Work
+## Meta Pixel (DONE)
 
-User wants to run FB/IG ads and needs Meta Pixel.
+- Pixel ID `713530188067823` (dataset "AutoLeasing", portfolio AutoBiznes_Leasing).
+- Implemented in `index.html` and pushed (commit `a8eee7b`).
+- Loads ONLY after cookie consent (see Cookie Consent below).
+- Events: `PageView` (on consent/page view) and `Lead` (fired on successful form submit via `ggTrackLead()` inside the form-success path).
+- Verified locally with real network beacons to Meta: `facebook.com/tr/?id=713530188067823&ev=PageView` and `...&ev=Lead` both returned 200. No pixel/beacons fire before consent or after "decline".
+- Still TODO once domain is live: confirm with Meta Pixel Helper on the live page, and do Meta domain verification (needed for stable ad delivery; can't verify github.io, must verify own domain leasing.gryphongroup.pl).
 
-Next task:
+## Cookie Consent
 
-1. Get Meta Pixel ID from the user.
-2. Add Meta Pixel base code to `index.html`.
-3. Prefer privacy-aware behavior:
-   - Pixel should load only after cookie/marketing consent if implementing full compliance.
-   - Current privacy text says marketing/analytics cookies are enabled only after consent if added.
-   - If user wants simplest launch first, clearly explain the tradeoff and consider adding a small cookie consent banner.
-4. Track at least:
-   - `PageView`
-   - lead form success as `Lead`
-5. Deploy to GitHub Pages.
-6. Verify public page opens and form still works.
-7. User can verify Pixel in Meta Events Manager / Meta Pixel Helper.
+- Small banner `#cookieBanner` (UA/RU), buttons `#cookieAccept` / `#cookieDecline`.
+- Consent stored in `localStorage` key `gg_consent` = `granted` | `denied`.
+- `granted` -> `loadPixel()` runs (init + PageView). `denied`/none -> no pixel.
+- Required because the RODO privacy policy states marketing/analytics cookies load only after consent.
+
+## Custom Domain (PAUSED - CNAME removed until TheHost DNS works)
+
+- Target public URL for ads: `https://leasing.gryphongroup.pl/` (subdomain; main domain `gryphongroup.pl` already hosts the company site - do NOT touch it).
+- Method: keep files on GitHub Pages, point subdomain via DNS CNAME -> `liliia2.github.io`.
+- Domain + hosting at TheHost (panels: my.thehost.com.ua billing + s22.thehost.com.ua ISPmanager). Nameservers: ns1-4.thehost.com.ua.
+- User added DNS record in ISPmanager -> "Доменные имена" -> gryphongroup.pl -> Записи: `leasing  CNAME  liliia2.github.io.` (visible in panel) BUT authoritative `ns1.thehost.com.ua` does NOT serve it yet -> `leasing.gryphongroup.pl` = NXDOMAIN. TheHost-side sync issue; user told to contact TheHost support.
+- IMPORTANT: the `CNAME` repo file was REMOVED (commit `7181782`) because while it was present, github.io 301-redirected to the dead domain and the live site was down. So right now the site lives on github.io with NO custom domain.
+- TO RE-ATTACH the domain once it resolves: first verify `nslookup leasing.gryphongroup.pl ns1.thehost.com.ua` returns `liliia2.github.io`; THEN re-create the `CNAME` file (one line: `leasing.gryphongroup.pl`) in repo root, commit + push. Do NOT re-add the CNAME file before DNS resolves, or the live site goes down again.
+
+## Note: logo "disappeared" was NOT a bug
+
+- On 13.06 the user saw a white box instead of the header logo. Root cause: (1) the Claude preview panel was glitching (not rendering images, screenshots timing out) and (2) the browser had cached the old 301 redirect. The logo (`.brand-mark` background-crop of `assets/logo.webp`) and all images are fine (verified: files load 200, canvas crop shows the gold wing). Resolved by removing CNAME + viewing in a normal/incognito browser. Do not "fix" the logo crop.
+
+## Next Work (in order)
+
+1. Get `leasing.gryphongroup.pl` resolving (TheHost support / wait for DNS).
+2. Verify live page loads, lead form still submits (Telegram + Sheet), and Meta Pixel fires (Pixel Helper).
+3. Meta domain verification for `gryphongroup.pl` (Business settings -> Brand safety -> Domains) so the pixel/ads work reliably.
+4. Optional cleanup: revoke/regenerate the bot token in @BotFather (it was exposed in a screenshot) and update Apps Script.
 
 ## Important User Style
 
