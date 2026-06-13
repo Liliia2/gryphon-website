@@ -375,6 +375,18 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
 .foot-contacts a:hover{color:var(--gold-bright);}
 .foot-bottom a{color:var(--on-dark-mute);text-decoration:underline;text-underline-offset:2px;}
 .foot-bottom a:hover{color:var(--gold-bright);}
+
+/* ===== COOKIE BANNER ===== */
+.cookie-banner{position:fixed;left:16px;right:16px;bottom:16px;z-index:190;display:none;max-width:560px;margin:0 auto;background:var(--dark-2);color:var(--on-dark);border:1px solid var(--dark-line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);}
+.cookie-banner.show{display:block;}
+.cookie-banner p{font-size:13px;line-height:1.5;color:var(--on-dark-mute);margin-bottom:12px;}
+.cookie-banner a{color:var(--gold-bright);text-decoration:underline;}
+.cookie-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+.cookie-actions button{font-family:inherit;font-weight:700;font-size:14px;border-radius:10px;padding:9px 18px;cursor:pointer;border:1px solid var(--dark-line);}
+.cookie-decline{background:transparent;color:var(--on-dark-mute);}
+.cookie-decline:hover{color:#fff;}
+.cookie-accept{background:var(--gold);color:#1c150a;border-color:var(--gold);}
+.cookie-accept:hover{background:var(--gold-bright);}
 </style>
 </head>
 <body>
@@ -739,6 +751,15 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
   </div>
 </footer>
 
+<!-- COOKIE CONSENT -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Згода на cookie">
+  <p data-i18n="cookie_text">Ми використовуємо cookie для аналітики й реклами, щоб покращувати сайт і показувати релевантні пропозиції. Деталі — у <a href="#" class="open-privacy">Політиці приватності</a>.</p>
+  <div class="cookie-actions">
+    <button type="button" id="cookieDecline" class="cookie-decline" data-i18n="cookie_decline">Відхилити</button>
+    <button type="button" id="cookieAccept" class="cookie-accept" data-i18n="cookie_accept">Прийняти</button>
+  </div>
+</div>
+
 <!-- PRIVACY MODAL -->
 <div class="modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="ppTitle">
   <div class="modal-card">
@@ -862,6 +883,8 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
     f_consent:"Я ознакомился/лась с <a href=\"#\" class=\"open-privacy\">Политикой конфиденциальности</a> и даю согласие на обработку моих данных в целях обработки заявки и обратной связи.",
     f_consent_mkt:"Согласен(на) получать от Gryphon Group коммерческие предложения по e-mail, телефону или SMS.",
     foot_privacy:"Политика конфиденциальности",
+    cookie_text:"Мы используем cookie для аналитики и рекламы, чтобы улучшать сайт и показывать релевантные предложения. Подробнее — в <a href=\"#\" class=\"open-privacy\">Политике конфиденциальности</a>.",
+    cookie_accept:"Принять", cookie_decline:"Отклонить",
     foot_tag:"Лизинг авто в Польше для иностранцев и бизнеса — без лишней бюрократии."
   };
   var nodes = document.querySelectorAll('[data-i18n]');
@@ -991,7 +1014,8 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
     fetch(LEAD_ENDPOINT,{method:'POST',body:body})
       .then(function(r){ return r.json().catch(function(){ return {ok:r.ok}; }); })
       .then(function(res){
-        form.classList.add(res && res.ok ? 'sent' : 'error');
+        if(res && res.ok){ form.classList.add('sent'); if(typeof ggTrackLead==='function') ggTrackLead(); }
+        else { form.classList.add('error'); }
         form.scrollIntoView({behavior:'smooth',block:'center'});
       })
       .catch(function(){
@@ -1012,6 +1036,29 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
   document.getElementById('privacyClose').addEventListener('click',closePrivacy);
   pModal.addEventListener('click',function(e){ if(e.target===pModal) closePrivacy(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && pModal.classList.contains('open')) closePrivacy(); });
+
+  /* ===== Meta Pixel + cookie consent ===== */
+  var PIXEL_ID='713530188067823';
+  var pixelLoaded=false;
+  function loadPixel(){
+    if(pixelLoaded || !PIXEL_ID) return;
+    pixelLoaded=true;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init',PIXEL_ID);
+    fbq('track','PageView');
+  }
+  function ggTrackLead(){ if(pixelLoaded && window.fbq){ fbq('track','Lead'); } }
+
+  var COOKIE_KEY='gg_consent';
+  var cookieBanner=document.getElementById('cookieBanner');
+  function hideBanner(){ if(cookieBanner) cookieBanner.classList.remove('show'); }
+  var consent=null;
+  try{ consent=localStorage.getItem(COOKIE_KEY); }catch(e){}
+  if(consent==='granted'){ loadPixel(); }
+  else if(consent!=='denied' && cookieBanner){ cookieBanner.classList.add('show'); }
+  var cAccept=document.getElementById('cookieAccept'), cDecline=document.getElementById('cookieDecline');
+  if(cAccept) cAccept.addEventListener('click',function(){ try{localStorage.setItem(COOKIE_KEY,'granted');}catch(e){} hideBanner(); loadPixel(); });
+  if(cDecline) cDecline.addEventListener('click',function(){ try{localStorage.setItem(COOKIE_KEY,'denied');}catch(e){} hideBanner(); });
 })();
 </script>
 </body>
