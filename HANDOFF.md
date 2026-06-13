@@ -1,58 +1,154 @@
-# HANDOFF — Gryphon Group лендинг (передача для Codex)
+# HANDOFF - Gryphon Group landing
 
-Дата: 13.06.2026. Користувач — **не програміст**, веди простою мовою, по кроках.
+Date: 13.06.2026. User is not a programmer; explain simply, step by step.
 
-## Що це за проєкт
-Лендинг лізингу авто (Польща) — один самодостатній файл `index.html` (CSS+JS усередині), фото в `assets/`.
-Деталі й стабільні факти: див. `memory.md` і `plan.md` у цій же папці.
+## Project
 
-Готово й перевірено: дизайн, калькулятор (відкалібрований), політика приватності RODO, контакти.
-**Залишився ОДИН блокер запуску — приймач заявок з форми.**
+Landing page for auto leasing in Poland for foreigners and businesses.
 
-## Поточна задача (де застрягли)
+- Main file: `index.html` (self-contained CSS + JS).
+- Assets: `assets/`.
+- Context and stable facts: `memory.md`.
+- Next actions and checks: `plan.md`.
+- Public site: `https://liliia2.github.io/gryphon-website/`.
+- GitHub repo: `https://github.com/Liliia2/gryphon-website`.
+- GitHub Pages source: `main` branch, root `/`.
+- Latest pushed commit after lead receiver work: `e025db2 Wire lead form receiver`.
 
-Форма на сайті має слати заявки **в Telegram-групу + Google-таблицю**. Архітектура:
-`форма (index.html) → Google Apps Script (Web App) → Google Sheet + Telegram Bot API`.
+## Current State
 
-Код приймача готовий: `integrations/google-apps-script.gs` (інструкція `integrations/README-setup.md`).
-У `index.html` змінна `LEAD_ENDPOINT` чекає URL задеплоєного Web App.
+The landing page is online and the lead form works.
 
-### 🔴 Проблема
-Деплой Apps Script Web App **не проходить**: Google показує
-**«This app is blocked — This app tried to access sensitive info in your Google Account.»**
-(червоний трикутник, кнопки «Advanced/Додатково» НЕМАЄ).
+Completed and verified:
 
-Факти:
-- Повторюється **і в інкогніто** з єдиним акаунтом → це блок **рівня акаунта**, не плутанина логінів.
-- Акаунт — особистий Gmail `konoplyovaliliia@gmail.com`. Користувач є **власником** скрипта.
-- Скоупи скрипта: `https://www.googleapis.com/auth/spreadsheets` (openById) +
-  `https://www.googleapis.com/auth/script.external_request` (UrlFetch до api.telegram.org) — обидва «sensitive».
-- Останній крок діагностики: перевіряли, чи ввімкнена **Advanced Protection Program** на `myaccount.google.com/security` (результат від користувача ще треба отримати).
+- Design, calculator, UA/RU language switcher, RODO privacy modal, contacts.
+- Google Apps Script Web App receives form submissions.
+- Leads go to Telegram group and Google Sheet.
+- Public GitHub Pages version contains the working `LEAD_ENDPOINT`.
+- Real test from the public landing page worked.
+- Fallback Telegram link on form error is `https://t.me/Gryphon_Group`.
 
-### Гіпотези причини
-1. **Advanced Protection Program** увімкнена на акаунті → жорстко блокує неперевірені скрипти. Тоді consent-фікс не допоможе.
-2. Потрібно налаштувати **OAuth consent screen** у окремому GCP-проєкті + додати себе як **test user**, потім у Apps Script: ⚙ Project Settings → Google Cloud Platform (GCP) Project → Change project → номер цього GCP-проєкту → редеплой.
+## Lead Receiver
 
-### Що зробити Codex
-Обрати/реалізувати робочий шлях, щоб заявки гарантовано доходили в Telegram-групу + таблицю:
-- Якщо Advanced Protection ВИМКНЕНА → провести користувача через налаштування OAuth consent screen (test user) і деплой Web App.
-- Якщо УВІМКНЕНА (або шлях задовгий) → запропонувати простіший приймач без самописного Apps Script:
-  Make.com / Zapier (webhook → Google Sheets + Telegram) або інший no-code варіант, який не впирається в цей блок.
-- Після того як приймач працює: вставити робочий URL у `LEAD_ENDPOINT` в `index.html`, протестувати,
-  **перевипустити токен бота** (засвічений у скриншоті) і замінити запасне TG-посилання `https://t.me/CHANGE_ME`.
+Architecture:
 
-## Конфіг, який уже є (НЕ секрети, окрім токена)
-- Google Sheet ID: `1uLfIVEBWJ1balWa6Z7bY8nKa-Le8lGxUITw3Kq5rDVI`, лист `Заявки лізинг`.
-- Telegram група chat_id: `-1003988229437` (працівники додані, бот — адмін групи).
-- Bot token: вписаний у `google-apps-script.gs` рядок 8 на боці користувача. **Засвічений у скриншоті — перевипустити (`/revoke` у @BotFather).** У файли проєкту НЕ записувати.
+`index.html form -> Google Apps Script Web App -> Google Sheet + Telegram Bot API`
 
-## Ключові файли
-- `index.html` — лендинг. Форма: `#leadForm`; змінна `LEAD_ENDPOINT` у `<script>`; honeypot `company_extra`; екрани `.form-success` / `.form-error`.
-- `integrations/google-apps-script.gs` — код приймача (Sheet + Telegram).
-- `integrations/README-setup.md` — покрокова інструкція налаштування.
-- `memory.md`, `plan.md` — контекст і наступні дії.
+Important files:
 
-## Як перевірити, що приймач працює
-1. Відкрити `LEAD_ENDPOINT` (`...exec`) у браузері → має бути `{"ok":true,"status":"alive"}`.
-2. Відправити тестову заявку з лендингу → рядок з'являється в листі «Заявки лізинг» І повідомлення приходить у Telegram-групу.
-3. Вимкнути інтернет і відправити → форма показує екран «Не вдалося відправити» (а не фейкове «дякуємо»).
+- `index.html`
+  - form id: `#leadForm`
+  - endpoint variable: `LEAD_ENDPOINT`
+  - honeypot field: `company_extra`
+  - success state: `.form-success`
+  - error state: `.form-error`
+- `integrations/google-apps-script.gs`
+  - reference copy of Apps Script code
+  - token is intentionally a placeholder and must never be committed
+- `integrations/README-setup.md`
+  - setup instructions
+
+Working Web App URL currently in `index.html`:
+
+```text
+https://script.google.com/macros/s/AKfycbzmLWw0U4tobb1F6c9rRwpP_7krOtHleNyJMS-nJ7NcY0WgtqYyUZGe3NMjlDOliU-cZg/exec
+```
+
+Google Sheet:
+
+```text
+1uLfIVEBWJ1balWa6Z7bY8nKa-Le8lGxUITw3Kq5rDVI
+```
+
+Sheet tab:
+
+```text
+Заявки лізинг
+```
+
+Telegram group chat id:
+
+```text
+-1003988229437
+```
+
+Bot token:
+
+- Exists only inside the user's Apps Script project.
+- Do not write it into repo files.
+- It was exposed in a screenshot earlier; optional recommended cleanup after launch: revoke/regenerate in @BotFather and update Apps Script.
+
+## Google Apps Script Block Was Fixed
+
+Original blocker:
+
+Google showed "This app is blocked - This app tried to access sensitive info in your Google Account" with no Advanced button.
+
+Fix used:
+
+1. Created/configured OAuth consent screen in Google Cloud project `My First Project`.
+2. Project number: `968177333470`.
+3. Added test user: `konoplyovaliliia@gmail.com`.
+4. Connected Apps Script to this standard GCP project in Apps Script settings.
+5. Redeployed Web App.
+
+After that Google showed the normal "Google hasn't verified this app" test warning. User continued, selected all permissions, and allowed access.
+
+## Verification Already Done
+
+- GET to Web App returned:
+
+```json
+{"ok":true,"status":"alive"}
+```
+
+- POST test returned:
+
+```json
+{"ok":true}
+```
+
+- User confirmed Telegram group received a test lead.
+- User confirmed Google Sheet received test leads.
+- Phone number `+48 516 929 619` was tested and now writes to Sheet without `#ERROR!`.
+- User confirmed the public landing form worked.
+
+## Deployment
+
+Published to GitHub Pages:
+
+```text
+https://liliia2.github.io/gryphon-website/
+```
+
+The online HTML was checked after deploy and contains:
+
+- current Web App endpoint
+- fallback Telegram link `https://t.me/Gryphon_Group`
+
+## Next Work
+
+User wants to run FB/IG ads and needs Meta Pixel.
+
+Next task:
+
+1. Get Meta Pixel ID from the user.
+2. Add Meta Pixel base code to `index.html`.
+3. Prefer privacy-aware behavior:
+   - Pixel should load only after cookie/marketing consent if implementing full compliance.
+   - Current privacy text says marketing/analytics cookies are enabled only after consent if added.
+   - If user wants simplest launch first, clearly explain the tradeoff and consider adding a small cookie consent banner.
+4. Track at least:
+   - `PageView`
+   - lead form success as `Lead`
+5. Deploy to GitHub Pages.
+6. Verify public page opens and form still works.
+7. User can verify Pixel in Meta Events Manager / Meta Pixel Helper.
+
+## Important User Style
+
+- User is not a programmer.
+- Give one practical step at a time.
+- Do not send the user to run terminal commands; run checks yourself when possible.
+- Ask confirmation before publishing, changing billing, installing programs, or deleting files.
+- Keep explanations simple and tied to the business result: running ads to a working landing page that records leads.
