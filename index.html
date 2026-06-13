@@ -164,6 +164,10 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .calc-result .rl{font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-dark-mute);position:relative;}
 .calc-result .rv{font-family:'Fraunces';font-weight:600;font-size:clamp(30px,3vw,40px);line-height:1;margin-top:6px;position:relative;}
 .calc-result .rv span{font-size:17px;color:var(--gold-bright);font-weight:600;}
+.calc-result .rv-net{margin-top:5px;font-size:14px;color:var(--on-dark-mute);font-weight:600;position:relative;}
+.calc-result .rv-net b{color:var(--cream);font-size:19px;font-weight:700;}
+.calc-result .rv-sum{margin-top:12px;padding-top:10px;border-top:1px solid var(--dark-line);font-size:12px;color:var(--on-dark-mute);position:relative;line-height:1.6;}
+.calc-result .rv-sum b{color:var(--cream);font-weight:700;}
 .calc-note{margin-top:14px;font-size:11.5px;color:var(--muted);line-height:1.5;}
 
 /* TRUST BAR */
@@ -271,6 +275,15 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .form-success p{color:var(--on-dark-mute);font-size:15px;}
 .form.sent .form-body{display:none;}
 .form.sent .form-success{display:block;}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;}
+.form-error{display:none;text-align:center;padding:24px 10px;}
+.form.error .form-body{display:none;}
+.form.error .form-error{display:block;}
+.form-error h3{color:#fff;font-size:22px;margin-bottom:10px;}
+.form-error p{color:var(--on-dark-mute);font-size:15px;margin-bottom:14px;}
+.form-error-contacts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.form-error-contacts a{color:var(--gold-bright);font-weight:700;text-decoration:none;border:1px solid var(--dark-line);border-radius:12px;padding:10px 18px;}
+.form-error-contacts a:hover{background:rgba(215,169,91,.1);}
 
 /* FOOTER */
 footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-top:1px solid var(--dark-line);}
@@ -331,6 +344,37 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
 @media(max-width:600px){
   .cta-tail{display:none;}
 }
+
+/* ===== CONSENT (form) ===== */
+.consent{display:flex;gap:10px;align-items:flex-start;margin-top:6px;font-size:13px;line-height:1.45;color:var(--on-dark-mute);cursor:pointer;}
+.consent input{flex:0 0 auto;width:18px;height:18px;margin-top:1px;accent-color:var(--gold);cursor:pointer;}
+.consent a{color:var(--gold-bright);text-decoration:underline;text-underline-offset:2px;}
+.consent a:hover{color:#fff;}
+.consent-note{font-size:12px;color:var(--on-dark-mute);margin-top:4px;opacity:.8;}
+
+/* ===== PRIVACY MODAL ===== */
+.modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,11,7,0.72);backdrop-filter:blur(3px);}
+.modal.open{display:flex;}
+.modal-card{background:var(--paper);color:var(--ink-2);max-width:760px;width:100%;max-height:86vh;border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 28px;border-bottom:1px solid var(--line);}
+.modal-head h2{font-family:'Fraunces',serif;font-size:24px;color:var(--ink);}
+.modal-close{flex:0 0 auto;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--cream);font-size:20px;line-height:1;color:var(--muted);cursor:pointer;transition:.15s;}
+.modal-close:hover{background:var(--cream-2);color:var(--ink);}
+.modal-body{padding:22px 28px 28px;overflow-y:auto;font-size:14px;line-height:1.6;}
+.modal-body h3{font-family:'Fraunces',serif;font-size:17px;color:var(--ink);margin:18px 0 6px;}
+.modal-body h3:first-child{margin-top:0;}
+.modal-body p{margin:6px 0;color:var(--ink-2);}
+.modal-body ul{margin:6px 0 6px 18px;}
+.modal-body li{margin:3px 0;}
+.modal-body a{color:var(--gold-deep);text-decoration:underline;}
+.modal-body .pp-meta{font-size:12px;color:var(--muted);margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
+
+/* ===== FOOTER contacts ===== */
+.foot-contacts{margin-top:12px;display:flex;flex-direction:column;gap:4px;font-size:14px;}
+.foot-contacts a{color:var(--on-dark);text-decoration:none;}
+.foot-contacts a:hover{color:var(--gold-bright);}
+.foot-bottom a{color:var(--on-dark-mute);text-decoration:underline;text-underline-offset:2px;}
+.foot-bottom a:hover{color:var(--gold-bright);}
 </style>
 </head>
 <body>
@@ -445,14 +489,16 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
           </div>
         </div>
         <div class="calc-field">
-          <div class="lbl"><span data-i18n="calc_buyout">Викуп</span><b><span id="cBuyPct">1</span>% · <span id="cBuyVal">1 800</span></b></div>
-          <input type="range" id="cBuy" min="1" max="30" step="1" value="1">
+          <div class="lbl"><span data-i18n="calc_buyout">Викуп</span><b><span id="cBuyPct">20</span>% · <span id="cBuyVal">36 000</span></b></div>
+          <input type="range" id="cBuy" min="1" max="45" step="1" value="20">
         </div>
         <div class="calc-result" id="calc-result">
-          <div class="rl" data-i18n="calc_result">Орієнтовна ставка, брутто</div>
-          <div class="rv"><span id="cRate">3 960</span> PLN <span data-i18n="calc_pm">/ міс.</span></div>
+          <div class="rl" data-i18n="calc_result">Орієнтовна щомісячна рата</div>
+          <div class="rv"><span id="cRate">3 960</span> PLN <span data-i18n="calc_pm">/ міс. брутто</span></div>
+          <div class="rv-net"><span data-i18n="calc_net_label">нетто:</span> <b id="cRateNet">3 220</b> PLN <span data-i18n="calc_pm2">/ міс.</span></div>
+          <div class="rv-sum"><span data-i18n="calc_rats">Кількість рат:</span> <b id="cRats">47</b> · <span data-i18n="calc_buyend">викуп наприкінці:</span> <b id="cBuyEnd">36 000</b> PLN</div>
         </div>
-        <p class="calc-note" data-i18n="calc_note">Розрахунок орієнтовний і не є офертою. Точні умови залежать від авто, лізингодавця та оцінки заявки.</p>
+        <p class="calc-note" data-i18n="calc_note">Розрахунок орієнтовний і не є офертою. VAT 23%; ставка орієнтовна (WIBOR + маржа банку); opłata wstępna — перший платіж, далі (термін − 1) рат і викуп наприкінці. Точні умови залежать від авто, лізингодавця та оцінки заявки.</p>
       </div>
     </div>
   </div>
@@ -622,8 +668,10 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
       <span class="eyebrow" data-i18n="final_label">Залишити заявку</span>
       <h2 data-i18n="final_title">Старе авто коштує тобі <em>3000 zł щомісяця</em>. Нове — рішення за 15 хвилин.</h2>
       <p data-i18n="final_sub">Залиш заявку зараз. Зв'яжемось, відповімо на всі питання та підберемо авто під твої задачі — без тиску й зобов'язань. Без карти побиту. Без перевірки доходів. Авто за 7 днів.</p>
-      <form class="form" id="leadForm" action="https://vibe-api.neurohacker.workers.dev/api/landing/callback/api/landing/leads/3a200738-3454-4e63-a5c7-c1f65a86ad92" method="POST" novalidate>
+      <form class="form" id="leadForm" method="POST" novalidate>
         <div class="form-body">
+          <input type="hidden" name="source" value="gryphon-website">
+          <input type="text" name="company_extra" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="frow">
             <div class="field"><label for="name" data-i18n="f_name">Ім'я</label><input type="text" id="name" name="name" data-i18n-ph="f_name_ph" placeholder="Твоє ім'я" required minlength="2"></div>
             <div class="field"><label for="phone" data-i18n="f_phone">Телефон / месенджер</label><input type="tel" id="phone" name="phone" placeholder="+48 000 000 000"></div>
@@ -647,6 +695,8 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
               </select>
             </div>
           </div>
+          <label class="consent"><input type="checkbox" id="consentMain" name="consent" required><span data-i18n="f_consent">Я ознайомився/лася з <a href="#" class="open-privacy">Політикою приватності</a> і даю згоду на обробку моїх даних з метою опрацювання заявки та зворотного зв'язку.</span></label>
+          <label class="consent"><input type="checkbox" id="consentMkt" name="consent_marketing" value="yes"><span data-i18n="f_consent_mkt">Погоджуюся отримувати від Gryphon Group комерційні пропозиції e-mail, телефоном або SMS.</span></label>
           <button type="submit" class="btn btn-gold"><span data-i18n="f_submit">Залишити заявку<span class="cta-tail"> — рішення за 15 хвилин</span></span><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M18 12H6"/></svg></button>
           <div class="final-guarantee"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.6-4A12 12 0 0112 2.9 12 12 0 013.4 6 12 12 0 003 9c0 5.6 3.8 10.3 9 11.6 5.2-1.3 9-6 9-11.6 0-1-.1-2-.4-3z"/></svg><span data-i18n="f_guarantee">Без зобов'язань. Підписуєш договір тільки тоді, коли все влаштовує.</span></div>
         </div>
@@ -654,6 +704,14 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
           <div class="sc"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
           <h3 data-i18n="f_ok_t">Заявку прийнято!</h3>
           <p data-i18n="f_ok_p">Ми зв'яжемось із тобою найближчим часом. Дякуємо за довіру.</p>
+        </div>
+        <div class="form-error" role="alert">
+          <h3 data-i18n="f_err_t">Не вдалося відправити</h3>
+          <p data-i18n="f_err_p">Перевірте з'єднання й спробуйте ще раз. Або напишіть/зателефонуйте нам прямо:</p>
+          <div class="form-error-contacts">
+            <a href="tel:+48516929619">+48 516 929 619</a>
+            <a href="https://t.me/Gryphon_Group" target="_blank" rel="noopener">Telegram</a>
+          </div>
         </div>
       </form>
     </div>
@@ -669,13 +727,66 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
           <span class="brand-mark" aria-hidden="true"></span>
           <span class="brand-text">Gryphon Group<small>Sp. z o.o.</small></span>
         </div>
-        <div class="foot-info">ul. Aleja Armii Krajowej 80 lok 18,<br>35-330 Rzeszów, Polska</div>
+        <div class="foot-info">ul. Aleja Armii Krajowej 80 lok 18,<br>35-307 Rzeszów, Polska</div>
+        <div class="foot-contacts">
+          <a href="tel:+48516929619">+48 516 929 619</a>
+          <a href="mailto:admin@gryphongroup.pl">admin@gryphongroup.pl</a>
+        </div>
       </div>
       <div class="foot-tag" data-i18n="foot_tag">Лізинг авто в Польщі для іноземців та бізнесу — без зайвої бюрократії.</div>
     </div>
-    <div class="foot-bottom">© 2026 Gryphon Group Sp. z o.o.</div>
+    <div class="foot-bottom">© 2026 Gryphon Group Sp. z o.o. · NIP 8133823354 · KRS 0000805925 · <a href="#" class="open-privacy" data-i18n="foot_privacy">Політика приватності</a></div>
   </div>
 </footer>
+
+<!-- PRIVACY MODAL -->
+<div class="modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="ppTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="ppTitle">Політика приватності</h2>
+      <button type="button" class="modal-close" id="privacyClose" aria-label="Закрити">&times;</button>
+    </div>
+    <div class="modal-body">
+      <h3>1. Адміністратор даних</h3>
+      <p>Адміністратором ваших персональних даних є <strong>Gryphon Group Sp. z o.o.</strong>, з місцезнаходженням за адресою ul. Aleja Armii Krajowej 80 lok 18, 35-307 Rzeszów, Польща. NIP: 8133823354, REGON: 384467200, KRS: 0000805925. Внесено до реєстру кредитних посередників (RPK): RPK047401. З питань захисту персональних даних звертайтеся: e-mail <a href="mailto:admin@gryphongroup.pl">admin@gryphongroup.pl</a>, тел. <a href="tel:+48516929619">+48 516 929 619</a>.</p>
+
+      <h3>2. Які дані ми обробляємо</h3>
+      <p>Через форму заявки ми обробляємо: ім'я, номер телефону / месенджер, адресу e-mail, обраний тип авто та статус, а також зміст вашого звернення. Надання даних добровільне, але без обов'язкових полів ми не зможемо опрацювати заявку та зв'язатися з вами.</p>
+
+      <h3>3. Мета та правова підстава обробки</h3>
+      <ul>
+        <li>опрацювання заявки, зворотний зв'язок і підготовка пропозиції — ст. 6 ч. 1 літ. b RODO (дії перед укладенням договору) або літ. f RODO (законний інтерес адміністратора щодо комунікації);</li>
+        <li>маркетинг власних послуг — ст. 6 ч. 1 літ. f RODO;</li>
+        <li>надсилання комерційної інформації e-mail чи контакт телефоном/SMS — лише за вашою окремою згодою, ст. 6 ч. 1 літ. a RODO;</li>
+        <li>встановлення, захист або задоволення претензій — ст. 6 ч. 1 літ. f RODO;</li>
+        <li>виконання обов'язків, передбачених законом — ст. 6 ч. 1 літ. c RODO.</li>
+      </ul>
+
+      <h3>4. Строк зберігання</h3>
+      <p>Дані зберігаються протягом часу опрацювання заявки й ведення листування, а далі — до спливу строку давності можливих претензій. Дані на підставі згоди — до її відкликання. Дані для маркетингу — до подання заперечення.</p>
+
+      <h3>5. Одержувачі даних</h3>
+      <p>Дані можуть передаватися постачальникам, які обслуговують адміністратора: хостинг, електронна пошта, CRM, аналітичні та маркетингові інструменти, IT- та бухгалтерські послуги — лише в необхідному обсязі та на підставі договорів про доручення обробки.</p>
+
+      <h3>6. Передавання за межі ЄЕП</h3>
+      <p>Як правило, ми не передаємо дані за межі Європейського економічного простору. Якщо ж використовуються інструменти постачальників поза ЄЕП (напр. Google), передавання відбувається із застосуванням передбачених RODO гарантій (стандартні договірні положення Європейської Комісії).</p>
+
+      <h3>7. Автоматизовані рішення</h3>
+      <p>Ваші дані не використовуються для прийняття рішень, що ґрунтуються виключно на автоматизованій обробці й мають для вас правові наслідки.</p>
+
+      <h3>8. Ваші права</h3>
+      <p>Ви маєте право на: доступ до даних, їх виправлення, видалення, обмеження обробки, перенесення, заперечення проти обробки, а також відкликання згоди в будь-який момент. Відкликання згоди не впливає на законність обробки, здійсненої до відкликання.</p>
+
+      <h3>9. Скарга до наглядового органу</h3>
+      <p>Ви маєте право подати скаргу до Голови Управління захисту персональних даних (Prezes UODO), ul. Stawki 2, 00-193 Warszawa, <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>.</p>
+
+      <h3>10. Файли cookie</h3>
+      <p>Сайт використовує лише технічно необхідні файли cookie для коректної роботи. Маркетингові та аналітичні cookie вмикаються лише за вашою згодою (якщо їх буде додано).</p>
+
+      <p class="pp-meta">Остання редакція: 13.06.2026. Адміністратор може оновлювати політику; актуальна версія завжди доступна на цій сторінці.</p>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -690,8 +801,9 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
     hero_b3:"Новые фирмы — без требований к стажу компании",
     hero_cta1:"Оставить заявку", hero_cta2:"Рассчитать ставку",
     calc_title:"Калькулятор ставки лизинга", calc_price:"Цена авто, брутто", calc_down:"Первый взнос",
-    calc_term:"Срок", calc_buyout:"Выкуп", calc_result:"Ориентировочная ставка, брутто", calc_pm:"/ мес.",
-    calc_note:"Расчёт ориентировочный и не является офертой. Точные условия зависят от авто, лизингодателя и оценки заявки.",
+    calc_term:"Срок", calc_buyout:"Выкуп", calc_result:"Ориентировочная месячная рата", calc_pm:"/ мес. брутто",
+    calc_net_label:"нетто:", calc_pm2:"/ мес.", calc_rats:"Кол-во рат:", calc_buyend:"выкуп в конце:",
+    calc_note:"Расчёт ориентировочный и не является офертой. VAT 23%; ставка ориентировочная (WIBOR + маржа банка); opłata wstępna — первый платёж, далее (срок − 1) рат и выкуп в конце. Точные условия зависят от авто, лизингодателя и оценки заявки.",
     calc_eyebrow:"Калькулятор", calc_h2:"Рассчитайте ориентировочную <em>ставку</em> лизинга", calc_h2sub:"Ориентировочный расчёт за секунды. Точные условия определим под ваше авто и лизингодателя.",
     trust_1:"Легковые автомобили, бусы, специальный транспорт и грузовики", trust_2:"Лучшие условия финансирования — сотрудничаем с 15+ лизинговыми фирмами и банками",
     trust_3:"Полное сопровождение формальностей", trust_4:"Коммуникация UA / RU",
@@ -746,6 +858,10 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
     f_submit:"Оставить заявку<span class=\"cta-tail\"> — решение за 15 минут</span>",
     f_guarantee:"Без обязательств. Подписываешь договор только тогда, когда всё устраивает.",
     f_ok_t:"Заявка принята!", f_ok_p:"Мы свяжемся с тобой в ближайшее время. Спасибо за доверие.",
+    f_err_t:"Не удалось отправить", f_err_p:"Проверьте соединение и попробуйте ещё раз. Или напишите/позвоните нам напрямую:",
+    f_consent:"Я ознакомился/лась с <a href=\"#\" class=\"open-privacy\">Политикой конфиденциальности</a> и даю согласие на обработку моих данных в целях обработки заявки и обратной связи.",
+    f_consent_mkt:"Согласен(на) получать от Gryphon Group коммерческие предложения по e-mail, телефону или SMS.",
+    foot_privacy:"Политика конфиденциальности",
     foot_tag:"Лизинг авто в Польше для иностранцев и бизнеса — без лишней бюрократии."
   };
   var nodes = document.querySelectorAll('[data-i18n]');
@@ -804,31 +920,39 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
 
   /* ===== calculator ===== */
   var nf=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:0});
-  var ANNUAL=0.105; // effective annual rate (~20-25% overpayment over 5 years)
+  var ANNUAL=0.082694; // ефективна річна (≈8,27%; номінальна ~7,97% = WIBOR 3,81% + маржа). Відкалібровано 13.06.2026 під реальну рату партнера: 180 000 брутто / внесок 10% / викуп 25% / 60 міс → 2 702,42 PLN брутто.
+  var VAT=0.23;     // польський VAT 23% (нетто → брутто)
   var elPrice=document.getElementById('cPrice'),
       elDown=document.getElementById('cDown'), elDownPct=document.getElementById('cDownPct'), elDownVal=document.getElementById('cDownVal'),
       elBuy=document.getElementById('cBuy'), elBuyPct=document.getElementById('cBuyPct'), elBuyVal=document.getElementById('cBuyVal'),
-      elRate=document.getElementById('cRate'), termWrap=document.getElementById('cTerm');
+      elRate=document.getElementById('cRate'), elRateNet=document.getElementById('cRateNet'),
+      elRats=document.getElementById('cRats'), elBuyEnd=document.getElementById('cBuyEnd'),
+      termWrap=document.getElementById('cTerm');
   var term=48;
 
   function parsePrice(){ var n=parseInt((elPrice.value||'').replace(/[^0-9]/g,''),10); return isNaN(n)?0:n; }
   function calc(){
-    var price=parsePrice();
+    var priceBrutto=parsePrice();
     var downPct=+elDown.value, buyPct=+elBuy.value;
-    var down=price*downPct/100, buy=price*buyPct/100;
-    elDownPct.textContent=downPct; elDownVal.textContent=nf.format(Math.round(down));
-    elBuyPct.textContent=buyPct;  elBuyVal.textContent=nf.format(Math.round(buy));
-    var financed=Math.max(price-down,0);
-    var r=Math.pow(1+ANNUAL,1/12)-1, n=term;
-    var rate;
-    if(financed<=0){ rate=0; }
+    var downBrutto=priceBrutto*downPct/100, buyBrutto=priceBrutto*buyPct/100;
+    elDownPct.textContent=downPct; elDownVal.textContent=nf.format(Math.round(downBrutto));
+    elBuyPct.textContent=buyPct;  elBuyVal.textContent=nf.format(Math.round(buyBrutto));
+    // opłata wstępna = перший платіж при підписанні, тому рат = термін − 1
+    var n=Math.max(term-1,1);
+    if(elRats) elRats.textContent=n;
+    if(elBuyEnd) elBuyEnd.textContent=nf.format(Math.round(buyBrutto));
+    var financed=Math.max(priceBrutto-downBrutto,0);
+    var r=Math.pow(1+ANNUAL,1/12)-1;
+    var rateBrutto;
+    if(financed<=0){ rateBrutto=0; }
     else{
       var disc=Math.pow(1+r,-n);
-      // loan with residual (balloon) payment
-      rate=(financed - buy*disc) * r / (1-disc);
-      if(!isFinite(rate)||rate<0) rate=financed/n;
+      // ануїтет із залишковою вартістю (викуп як balloon наприкінці)
+      rateBrutto=(financed - buyBrutto*disc) * r / (1-disc);
+      if(!isFinite(rateBrutto)||rateBrutto<0) rateBrutto=financed/n;
     }
-    elRate.textContent=nf.format(Math.round(rate));
+    elRate.textContent=nf.format(Math.round(rateBrutto));
+    if(elRateNet) elRateNet.textContent=nf.format(Math.round(rateBrutto/(1+VAT)));
   }
   function formatPriceField(){
     var n=parsePrice();
@@ -847,16 +971,47 @@ footer{background:var(--dark-2);color:var(--on-dark);padding:56px 0 40px;border-
   calc();
 
   /* ===== form submit ===== */
+  // Web App URL з Google Apps Script (приймач → Google Sheet + Telegram). Замінити після деплою.
+  var LEAD_ENDPOINT='https://script.google.com/macros/s/AKfycbzmLWw0U4tobb1F6c9rRwpP_7krOtHleNyJMS-nJ7NcY0WgtqYyUZGe3NMjlDOliU-cZg/exec';
   var form=document.getElementById('leadForm');
+  var submitBtn=form.querySelector('button[type="submit"]');
   form.addEventListener('submit',function(ev){
     ev.preventDefault();
+    // honeypot: бот заповнив приховане поле → тихо показуємо «успіх», нічого не шлемо
+    var hp=form.querySelector('.hp');
+    if(hp && hp.value){ form.classList.add('sent'); return; }
     if(!form.checkValidity()){ form.reportValidity(); return; }
-    var data=new FormData(form);
-    fetch(form.action,{method:'POST',body:data}).catch(function(){}).finally(function(){
-      form.classList.add('sent');
-      form.scrollIntoView({behavior:'smooth',block:'center'});
-    });
+    if(!LEAD_ENDPOINT || LEAD_ENDPOINT.indexOf('PASTE_')===0){
+      console.warn('LEAD_ENDPOINT не налаштовано — встав Web App URL Google Apps Script.');
+      form.classList.add('error'); form.scrollIntoView({behavior:'smooth',block:'center'}); return;
+    }
+    var body=new URLSearchParams();
+    new FormData(form).forEach(function(v,k){ body.append(k,v); });
+    if(submitBtn) submitBtn.disabled=true;
+    fetch(LEAD_ENDPOINT,{method:'POST',body:body})
+      .then(function(r){ return r.json().catch(function(){ return {ok:r.ok}; }); })
+      .then(function(res){
+        form.classList.add(res && res.ok ? 'sent' : 'error');
+        form.scrollIntoView({behavior:'smooth',block:'center'});
+      })
+      .catch(function(){
+        form.classList.add('error');
+        form.scrollIntoView({behavior:'smooth',block:'center'});
+      })
+      .finally(function(){ if(submitBtn) submitBtn.disabled=false; });
   });
+
+  /* ===== privacy modal ===== */
+  var pModal=document.getElementById('privacyModal');
+  function openPrivacy(){ pModal.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closePrivacy(){ pModal.classList.remove('open'); document.body.style.overflow=''; }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('.open-privacy');
+    if(t){ e.preventDefault(); openPrivacy(); }
+  });
+  document.getElementById('privacyClose').addEventListener('click',closePrivacy);
+  pModal.addEventListener('click',function(e){ if(e.target===pModal) closePrivacy(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && pModal.classList.contains('open')) closePrivacy(); });
 })();
 </script>
 </body>
